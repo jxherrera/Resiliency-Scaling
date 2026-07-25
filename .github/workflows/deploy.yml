@@ -1,0 +1,44 @@
+name: CI/CD Pipeline - AWS Cloud Resiliency & Scaling Deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to AWS EC2 Instance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy to AWS EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "🚀 Iniciando despliegue 'Manos Libres' en AWS EC2..."
+            
+            # Navegar al directorio del proyecto en la instancia EC2
+            cd ~/compu || cd ~/app || cd ~/project || mkdir -p ~/app && cd ~/app
+            
+            # Actualizar código desde GitHub
+            git pull origin main || echo "Primer despliegue o clonación manual requerida"
+            
+            # Hacer ejecutable el agente SRE
+            chmod +x backup_agent.sh || true
+            
+            # Levantar contenedores en caliente con 3 réplicas del Backend
+            docker compose down || true
+            docker compose up -d --build --scale backend-service=3
+            
+            # Verificar estado de los contenedores
+            docker compose ps
+            docker stats --no-stream
+            
+            echo "✅ Despliegue completado exitosamente."
