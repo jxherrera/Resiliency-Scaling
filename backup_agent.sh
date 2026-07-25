@@ -12,7 +12,7 @@ BACKUP_FILENAME="backup_${TIMESTAMP}.sql.gz"
 BACKUP_FILEpath="${BACKUP_DIR}/${BACKUP_FILENAME}"
 
 # Nombre del contenedor de Base de Datos y usuario DB
-DB_CONTAINER="postgres-db"
+DB_CONTAINER="finflow_db"
 DB_USER="postgres"
 
 echo "=========================================="
